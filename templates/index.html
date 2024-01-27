@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div hx-target="this" hx-swap="outerHTML">
+	<div><label>First Name</label>: Joe</div>
+	<div><label>Last Name</label>: Blow</div>
+	<div><label>Email</label>: joe@blow.com</div>
+	<button hx-get="/contact/1/edit" class="btn btn-primary">
+	Click To Edit
+	</button>
+</div>
+
+<button hx-get="/dmvis" hx-target="#dmplot" hx-swap="outerHTML" class="btn btn-primary">Click for plot</button>
+<img id="dmplot"></img>
+
+
+{% endblock content %}
