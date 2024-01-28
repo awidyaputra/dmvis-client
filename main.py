@@ -1,5 +1,5 @@
 import pathlib
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import FastAPI, Request, Response, Form
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -8,10 +8,15 @@ from fastapi.staticfiles import StaticFiles
 
 from pydantic import BaseModel
 
-from matplotlib.figure import Figure
 from io import BytesIO
 import base64
 
+import time
+
+from dmvis import DMPlot, DMVisualisation, TramState
+
+
+dmvis = DMVisualisation()
 
 app = FastAPI()
 
@@ -25,6 +30,10 @@ class Contact(BaseModel):
     first_name: str
     last_name: str
     email: str
+
+
+class Stuff(BaseModel):
+    xs: List[float]
 
 
 contact = Contact(first_name="Joe", last_name="Blow", email="joe@blow.com")
@@ -91,12 +100,7 @@ async def put_contact(
 
 @app.get("/dmvis", response_class=HTMLResponse)
 async def get_dmvis(request: Request):
-    fig = Figure()
-    ax = fig.subplots()
-    ax.plot([1, 2])
-    buf = BytesIO()
-    fig.savefig(buf, format="png")
-    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    data = dmvis.draw_b64()
 
     context = {
         "request": request,
@@ -106,10 +110,35 @@ async def get_dmvis(request: Request):
     return templates.TemplateResponse("fragments/plot1.html", context)
 
 
-@app.post("/dmvis")
-async def update_dmvis(p):
-    print(p)
-    # print(p.tram_state.x)
-    # print(p.tram_state.y)
-    # print(p.tram_state.v)
-    # print(p.tram_state.t)
+@app.post("/dmvis", status_code=201)
+async def update_dmvis(p: DMPlot):
+    dmvis.update_dmplot_state(p)
+    return
+
+
+@app.get("/dmvisbak", response_class=HTMLResponse)
+async def get_dmvisbak(request: Request):
+    tic = time.perf_counter_ns()
+    ax.clear()
+    ax.plot(xs)
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    toc = time.perf_counter_ns()
+    print((toc - tic) / 1_000_000)
+
+    context = {
+        "request": request,
+        "data": data,
+    }
+
+
+    return templates.TemplateResponse("fragments/plot1.html", context)
+
+
+@app.post("/dmvisbak", status_code=201)
+async def update_dmvisbak(stuff: Stuff):
+    global xs
+    xs = stuff.xs
+
+    return

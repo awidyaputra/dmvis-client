@@ -10,8 +10,8 @@
 	</button>
 </div>
 
-<button hx-get="/dmvis" hx-target="#dmplot" hx-swap="outerHTML" class="btn btn-primary">Click for plot</button>
-<img id="dmplot"></img>
+<button hx-get="/dmvis" hx-target="this" hx-swap="outerHTML" class="btn btn-primary">Click for plot</button>
+<!-- <img id="dmplot"></img> -->
 
 
 {% endblock content %}

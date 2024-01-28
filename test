@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for i in {1..100};
+do 
+http POST http://127.0.0.1:8000/dmvis < ./test1.json;
+sleep 0.033;
+http POST http://127.0.0.1:8000/dmvis < ./test2.json;
+sleep 0.033;
+done
