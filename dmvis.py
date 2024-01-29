@@ -1,15 +1,75 @@
+from typing import List
+from enum import IntEnum
 from pydantic import BaseModel
 
 
+class PowerLevel(IntEnum):
+    B5 = -5
+    B4 = -4
+    B3 = -3
+    B2 = -2
+    B1 = -1
+    N = 0
+    P1 = 1
+    P2 = 2
+    P3 = 3
+    P4 = 4
+    P5 = 5
+    P6 = 6
+    P7 = 7
+
+
 class TramState(BaseModel):
+    current_command: PowerLevel
+
     x: float
     y: float
     v: float
     t: float
 
 
+class FSMState(IntEnum):
+    ACC = 0
+    CA = 1
+    EBS = 2
+
+
+class TramStateTransition(BaseModel):
+    fsm_state: FSMState
+
+    safe_emergency_distance: float
+    lead_distance: float
+    ttc: float
+    dtc: float
+    speed: float
+
+
+class Position(BaseModel):
+    x: float
+    y: float
+
+
+class ObstacleState(BaseModel):
+    id: int
+    x: float
+    v: float
+    d: float
+
+
+class HLCState(BaseModel):
+    speed_setpoint: float
+
+    list_rail_horizon: List[Position]
+    list_detected_object: List[Position]
+    list_trajectory_prediction: List[Position]
+    list_detected_obstacle: List[ObstacleState]
+    list_detected_railway_obstacle: List[Position]
+
+
 class DMPlot(BaseModel):
     tram_state: TramState
+    tram_state_transition: TramStateTransition
+    hlc_state: HLCState
 
 
 import matplotlib
@@ -22,7 +82,28 @@ import base64
 
 
 class DMVisualisation:
-    def __init__(self, tram_state: TramState = TramState(x=0, y=0, v=0, t=0)):
+    def __init__(
+        self,
+        tram_state: TramState = TramState(
+            current_command=PowerLevel.N, x=0, y=0, v=0, t=0
+        ),
+        tram_state_transition: TramStateTransition = TramStateTransition(
+            fsm_state=FSMState.ACC,
+            safe_emergency_distance=15,
+            lead_distance=1000,
+            ttc=1000,
+            dtc=1000,
+            speed=1000,
+        ),
+        hlc_state: HLCState = HLCState(
+            speed_setpoint=0,
+            list_rail_horizon=[],
+            list_detected_object=[],
+            list_trajectory_prediction=[],
+            list_detected_obstacle=[],
+            list_detected_railway_obstacle=[],
+        ),
+    ):
         font = {"size": 9}
         matplotlib.rc("font", **font)
 
@@ -96,16 +177,35 @@ class DMVisualisation:
             self.ax05,
         ]
 
-        self.dmplot_state = DMPlot(tram_state=tram_state)
+        self.dmplot_state = DMPlot(
+            tram_state=tram_state,
+            tram_state_transition=tram_state_transition,
+            hlc_state=hlc_state,
+        )
 
-        xt = self.dmplot_state.tram_state.x
-        yt = self.dmplot_state.tram_state.y
-        (self.p051,) = self.ax05.plot(xt, yt, "gs", label="Tram")
+        self.t = [self.dmplot_state.tram_state.t]
+        self.yttc = [self.dmplot_state.tram_state_transition.ttc]
+        self.ydtc = [self.dmplot_state.tram_state_transition.dtc]
+
+        self.xt = [self.dmplot_state.tram_state.x]
+        self.yt = [self.dmplot_state.tram_state.y]
+
+        (self.p011,) = self.ax01.plot(self.t, self.yttc, "c-", label="TTC")
+        (self.p012,) = self.ax012.plot(self.t, self.ydtc, "-", label="DTC")
+        (self.p051,) = self.ax05.plot(self.xt, self.yt, "gs", label="Tram")
 
     def draw_b64(self):
-        self.p051.set_data(
-            self.dmplot_state.tram_state.y, self.dmplot_state.tram_state.x
-        )
+        self.t.append(self.dmplot_state.tram_state.t)
+        self.yttc.append(self.dmplot_state.tram_state_transition.ttc)
+        self.ydtc.append(self.dmplot_state.tram_state_transition.dtc)
+
+        self.xt.append(self.dmplot_state.tram_state.x)
+        self.yt.append(self.dmplot_state.tram_state.y)
+
+        self.p011.set_data(self.t, self.yttc)
+        self.p011.set_data(self.t, self.ydtc)
+
+        self.p051.set_data(self.yt, self.xt)
 
         buf = BytesIO()
         self.fig.savefig(buf, format="png")
@@ -114,6 +214,4 @@ class DMVisualisation:
         return data
 
     def update_dmplot_state(self, curr: DMPlot):
-        self.dmplot_state.tram_state.t += 1
-        self.dmplot_state.tram_state.x = curr.tram_state.x
-        self.dmplot_state.tram_state.y = curr.tram_state.y
+        self.dmplot_state = curr

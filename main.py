@@ -98,6 +98,16 @@ async def put_contact(
     return templates.TemplateResponse("fragments/a.html", context)
 
 
+@app.get("/dmvisdebug", response_class=HTMLResponse)
+async def get_dmvisdebug(request: Request):
+
+    context = {
+        "request": request,
+    }
+
+    return templates.TemplateResponse("fragments/dmvisdebug.html", context)
+
+
 @app.get("/dmvis", response_class=HTMLResponse)
 async def get_dmvis(request: Request):
     data = dmvis.draw_b64()
@@ -112,6 +122,7 @@ async def get_dmvis(request: Request):
 
 @app.post("/dmvis", status_code=201)
 async def update_dmvis(p: DMPlot):
+    print(p)
     dmvis.update_dmplot_state(p)
     return
 
