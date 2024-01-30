@@ -155,11 +155,6 @@ class DMVisualisation:
 
         ax05.axvspan(-1.2, 1.3, facecolor="gray", alpha=0.5)
 
-        ax01.plot([1, 2])
-        ax02.plot([1, 2])
-        ax03.plot([1, 2])
-        ax05.plot([1, 2])
-
         self.fig = fig
         self.ax01 = ax01
         self.ax012 = ax012
@@ -183,29 +178,102 @@ class DMVisualisation:
             hlc_state=hlc_state,
         )
 
-        self.t = [self.dmplot_state.tram_state.t]
-        self.yttc = [self.dmplot_state.tram_state_transition.ttc]
-        self.ydtc = [self.dmplot_state.tram_state_transition.dtc]
+        self.ystate = [0.0]
+        self.yd = [0.0]
+        self.ysd = [0.0]
+        self.yr = [0.0]
+        self.ys = [0.0]
+        self.ydbw = [0.0]
+        self.t = [0.0]
+        self.yttc = [0.0]
+        self.ydtc = [0.0]
 
-        self.xt = [self.dmplot_state.tram_state.x]
-        self.yt = [self.dmplot_state.tram_state.y]
+        self.xt = [0.0]
+        self.yt = [0.0]
+        self.yo = [0.0]
+        self.xo = [0.0]
+        self.yxre = [0.0]
+        self.yyre = [0.0]
+        self.yxtp = [0.0]
+        self.yytp = [0.0]
+        self.xmin = 0
+        self.xmax = 10.0
+        self.x = 0
 
         (self.p011,) = self.ax01.plot(self.t, self.yttc, "c-", label="TTC")
         (self.p012,) = self.ax012.plot(self.t, self.ydtc, "-", label="DTC")
+        (self.p021,) = ax02.plot(self.t, self.yd, "y-", label="distance")
+        (self.p022,) = ax02.plot(self.t, self.ysd, "g-", label="safe distance")
+        (self.p031,) = ax03.plot(self.t, self.yr, "b-", label="reference speed")
+        (self.p032,) = ax03.plot(self.t, self.ys, "r-", label="actual speed")
+        (self.p041,) = ax04.plot(self.t, self.ydbw, "m-.", label="dbw command")
+        (self.p042,) = ax04.plot(self.t, self.ystate, "k.-", label="state")
         (self.p051,) = self.ax05.plot(self.xt, self.yt, "gs", label="Tram")
+        (self.p052,) = ax05.plot(self.xo, self.yo, "b^", label="Obstacle")
+        (self.p053,) = ax05.plot(self.yxre, self.yyre, "g-", label="RE")
+        (self.p054,) = ax05.plot(self.yxtp, self.yytp, "b.", label="TP")
+
+        self.ax01.legend(
+            [self.p011, self.p012], [self.p011.get_label(), self.p012.get_label()]
+        )
+        self.ax02.legend(
+            [self.p021, self.p022], [self.p021.get_label(), self.p022.get_label()]
+        )
+        self.ax03.legend(
+            [self.p031, self.p032, self.p041],
+            [self.p031.get_label(), self.p032.get_label(), self.p041.get_label()],
+        )
 
     def draw_b64(self):
-        self.t.append(self.dmplot_state.tram_state.t)
+        self.xt = [0.0]
+        self.yt = [0.0]
+        self.yo = [0.0]
+        self.xo = [0.0]
+        self.yxre = [0.0]
+        self.yyre = [0.0]
+        self.yxtp = [0.0]
+        self.yytp = [0.0]
+
+        self.ystate.append(self.dmplot_state.tram_state_transition.fsm_state)
+        self.yd.append(self.dmplot_state.tram_state_transition.lead_distance)
+        self.ysd.append(self.dmplot_state.tram_state_transition.safe_emergency_distance)
+        self.yr.append(self.dmplot_state.hlc_state.speed_setpoint)
+        self.ys.append(self.dmplot_state.tram_state.v)
         self.yttc.append(self.dmplot_state.tram_state_transition.ttc)
         self.ydtc.append(self.dmplot_state.tram_state_transition.dtc)
+        self.yt.append(self.dmplot_state.tram_state.x)
+        self.xt.append(self.dmplot_state.tram_state.y)
+        self.t.append(self.dmplot_state.tram_state.t)
 
-        self.xt.append(self.dmplot_state.tram_state.x)
-        self.yt.append(self.dmplot_state.tram_state.y)
+        self.yo = [o.y for o in self.dmplot_state.hlc_state.list_detected_object]
+        self.xo = [o.x for o in self.dmplot_state.hlc_state.list_detected_object]
+        self.yyre = [o.y for o in self.dmplot_state.hlc_state.list_rail_horizon]
+        self.yxre = [o.x for o in self.dmplot_state.hlc_state.list_rail_horizon]
+        self.yytp = [
+            o.y for o in self.dmplot_state.hlc_state.list_trajectory_prediction
+        ]
+        self.yxtp = [
+            o.x for o in self.dmplot_state.hlc_state.list_trajectory_prediction
+        ]
 
         self.p011.set_data(self.t, self.yttc)
         self.p011.set_data(self.t, self.ydtc)
-
+        self.p021.set_data(self.t, self.yd)
+        self.p022.set_data(self.t, self.ysd)
+        self.p031.set_data(self.t, self.yr)
+        self.p032.set_data(self.t, self.ys)
+        self.p041.set_data(self.t, self.ydbw)
+        self.p042.set_data(self.t, self.ystate)
         self.p051.set_data(self.yt, self.xt)
+        self.p052.set_data(self.yo, self.xo)
+        self.p053.set_data(self.yyre, self.yxre)
+        self.p054.set_data(self.yytp, self.yxtp)
+
+        if self.x >= self.xmax - 1.00:
+            self.p011.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
+            self.p021.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
+            self.p032.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
+            self.p041.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
 
         buf = BytesIO()
         self.fig.savefig(buf, format="png")
