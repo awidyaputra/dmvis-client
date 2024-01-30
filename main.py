@@ -100,9 +100,35 @@ async def put_contact(
 
 @app.get("/dmvisdebug", response_class=HTMLResponse)
 async def get_dmvisdebug(request: Request):
+    lead_dist = dmvis.dmplot_state.tram_state_transition.lead_distance
+    safe_emergency_dist = dmvis.dmplot_state.tram_state_transition.safe_emergency_distance
+    rail_obs = dmvis.dmplot_state.hlc_state.list_detected_railway_obstacle
+    rail_obs_amount = len(rail_obs)
+    detected_obs = dmvis.dmplot_state.hlc_state.list_detected_obstacle
+    detected_obs_amount = len(detected_obs)
+    tram = dmvis.dmplot_state.tram_state
+    fsm_state = dmvis.dmplot_state.tram_state_transition.fsm_state.name
+    dtc = dmvis.dmplot_state.tram_state_transition.dtc
+    ttc = dmvis.dmplot_state.tram_state_transition.ttc
+    speed_setpoint = dmvis.dmplot_state.tram_state_transition.speed
 
     context = {
         "request": request,
+        
+        "lead_dist": lead_dist,
+        "safe_emergency_dist": safe_emergency_dist,
+        
+        "rail_obs_amount": rail_obs_amount,
+        "rail_obs": rail_obs,
+
+        "detected_obs_amount": detected_obs_amount,
+
+        "tram": tram,
+
+        "fsm_state": fsm_state,
+        "dtc": dtc,
+        "ttc": ttc,
+        "speed_setpoint": speed_setpoint,
     }
 
     return templates.TemplateResponse("fragments/dmvisdebug.html", context)

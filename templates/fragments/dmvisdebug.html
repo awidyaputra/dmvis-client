@@ -1,5 +1,28 @@
-<h2>Debug for dmvis!</h2>
+<section hx-get="/dmvisdebug", hx-trigger="every 33ms" hx-target="this" hx-swap="outerHTML">
+	<h2>Debug for dmvis!</h2>
 
-<h3>Railway Obstacles</h3>
-<p>Obstacle on the railway: {{ rail_obs_amount }}.</p>
-<p>: {{ rail_obs_amount }}.</p>
+	<h3>Safety Assessment</h3>
+	<p>{{ "%0.2f"|format(lead_dist) }}m &lt;Lead -- Thd EBS&gt;&emsp;{{ "%0.2f"|format(safe_emergency_dist) }}m</p>
+	<p>{{ "%0.2f"|format(lead_dist) }}m &lt;Lead -- Thd ACC&gt;&emsp;{{ "%0.2f"|format(safe_emergency_dist + 15) }}m</p>
+
+	<h3>Railway Obstacles</h3>
+	<p>Obstacles on the railway detected: {{ rail_obs_amount }}.</p>
+	<ul>
+		{% for obs in rail_obs %}
+		<li>x: {{ "%0.2f"|format(obs.x) }}m&emsp;y: {{ "%0.2f"|format(obs.y) }}m&emsp;</li>
+		{% endfor %}
+	</ul>
+
+
+	<h3>Obstacles</h3>
+	<p>Obstacles detected: {{ detected_obs_amount }}.</p>
+
+	<h3>Tram State</h3>
+	<p>x: {{ "%0.2f"|format(tram.x) }}m&emsp;y: {{ "%0.2f"|format(tram.y) }}m&emsp;v: {{ "%0.2f"|format(tram.v) }}m/s</p>
+
+	<h3>FSM State</h3>
+	<p>FSM State: {{ fsm_state }}</p>
+	<p>DTC: {{ "%0.2f"|format(dtc) }}&emsp;TTC: {{ "%0.2f"|format(ttc) }}</p>
+	<p>thd EBS: {{ "%0.2f"|format(safe_emergency_dist) }}m</p>
+	<p>Desired Speed: {{ "%0.2f"|format(speed_setpoint) }}m/s</p>
+</section>
