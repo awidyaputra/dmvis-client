@@ -122,6 +122,7 @@ async def get_dmvisdebug(request: Request):
         "rail_obs": rail_obs,
 
         "detected_obs_amount": detected_obs_amount,
+        "detected_obs": detected_obs,
 
         "tram": tram,
 
@@ -148,7 +149,7 @@ async def get_dmvis(request: Request):
 
 @app.post("/dmvis", status_code=201)
 async def update_dmvis(p: DMPlot):
-    print(p)
+    #print(p)
     dmvis.update_dmplot_state(p)
     return
 

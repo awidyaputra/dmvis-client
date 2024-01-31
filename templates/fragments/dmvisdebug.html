@@ -9,13 +9,18 @@
 	<p>Obstacles on the railway detected: {{ rail_obs_amount }}.</p>
 	<ul>
 		{% for obs in rail_obs %}
-		<li>x: {{ "%0.2f"|format(obs.x) }}m&emsp;y: {{ "%0.2f"|format(obs.y) }}m&emsp;</li>
+		<li>id: {{ "%d"|format(obs.id) }}m&emsp;x: {{ "%0.2f"|format(obs.x) }}m&emsp;y: {{ "%0.2f"|format(obs.y) }}m&emsp;d: {{ "%0.2f"|format(obs.d) }}m&emsp;v: {{ "%0.2f"|format(obs.v) }}m/s</li>
 		{% endfor %}
 	</ul>
 
 
 	<h3>Obstacles</h3>
 	<p>Obstacles detected: {{ detected_obs_amount }}.</p>
+	<ul>
+		{% for obs in rail_obs %}
+		<li>id: {{ "%d"|format(obs.id) }}m&emsp;x: {{ "%0.2f"|format(obs.x) }}m&emsp;y: {{ "%0.2f"|format(obs.y) }}m&emsp;d: {{ "%0.2f"|format(obs.d) }}m&emsp;v: {{ "%0.2f"|format(obs.v) }}m/s</li>
+		{% endfor %}
+	</ul>
 
 	<h3>Tram State</h3>
 	<p>x: {{ "%0.2f"|format(tram.x) }}m&emsp;y: {{ "%0.2f"|format(tram.y) }}m&emsp;v: {{ "%0.2f"|format(tram.v) }}m/s</p>

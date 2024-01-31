@@ -52,6 +52,7 @@ class Position(BaseModel):
 class ObstacleState(BaseModel):
     id: int
     x: float
+    y: float
     v: float
     d: float
 
@@ -63,7 +64,7 @@ class HLCState(BaseModel):
     list_detected_object: List[Position]
     list_trajectory_prediction: List[Position]
     list_detected_obstacle: List[ObstacleState]
-    list_detected_railway_obstacle: List[Position]
+    list_detected_railway_obstacle: List[ObstacleState]
 
 
 class DMPlot(BaseModel):
@@ -198,20 +199,20 @@ class DMVisualisation:
         self.yytp = [0.0]
         self.xmin = 0
         self.xmax = 10.0
-        self.x = 0
+        self.x = 0.0
 
         (self.p011,) = self.ax01.plot(self.t, self.yttc, "c-", label="TTC")
         (self.p012,) = self.ax012.plot(self.t, self.ydtc, "-", label="DTC")
-        (self.p021,) = ax02.plot(self.t, self.yd, "y-", label="distance")
-        (self.p022,) = ax02.plot(self.t, self.ysd, "g-", label="safe distance")
-        (self.p031,) = ax03.plot(self.t, self.yr, "b-", label="reference speed")
-        (self.p032,) = ax03.plot(self.t, self.ys, "r-", label="actual speed")
-        (self.p041,) = ax04.plot(self.t, self.ydbw, "m-.", label="dbw command")
-        (self.p042,) = ax04.plot(self.t, self.ystate, "k.-", label="state")
+        (self.p021,) = self.ax02.plot(self.t, self.yd, "y-", label="distance")
+        (self.p022,) = self.ax02.plot(self.t, self.ysd, "g-", label="safe distance")
+        (self.p031,) = self.ax03.plot(self.t, self.yr, "b-", label="reference speed")
+        (self.p032,) = self.ax03.plot(self.t, self.ys, "r-", label="actual speed")
+        (self.p041,) = self.ax04.plot(self.t, self.ydbw, "m-.", label="dbw command")
+        (self.p042,) = self.ax04.plot(self.t, self.ystate, "k.-", label="state")
         (self.p051,) = self.ax05.plot(self.xt, self.yt, "gs", label="Tram")
-        (self.p052,) = ax05.plot(self.xo, self.yo, "b^", label="Obstacle")
-        (self.p053,) = ax05.plot(self.yxre, self.yyre, "g-", label="RE")
-        (self.p054,) = ax05.plot(self.yxtp, self.yytp, "b.", label="TP")
+        (self.p052,) = self.ax05.plot(self.xo, self.yo, "b^", label="Obstacle")
+        (self.p053,) = self.ax05.plot(self.yxre, self.yyre, "g-", label="RE")
+        (self.p054,) = self.ax05.plot(self.yxtp, self.yytp, "b.", label="TP")
 
         self.ax01.legend(
             [self.p011, self.p012], [self.p011.get_label(), self.p012.get_label()]
@@ -243,7 +244,9 @@ class DMVisualisation:
         self.ydtc.append(self.dmplot_state.tram_state_transition.dtc)
         self.yt.append(self.dmplot_state.tram_state.x)
         self.xt.append(self.dmplot_state.tram_state.y)
-        self.t.append(self.dmplot_state.tram_state.t)
+
+        self.x = self.dmplot_state.tram_state.t
+        self.t.append(self.x)
 
         self.yo = [o.y for o in self.dmplot_state.hlc_state.list_detected_object]
         self.xo = [o.x for o in self.dmplot_state.hlc_state.list_detected_object]
