@@ -16,7 +16,20 @@ import time
 from dmvis import DMPlot, DMVisualisation, TramState
 
 
+class ProcessingTime(BaseModel):
+    duration: int
+
+
+class MoreDebugInfo:
+    def __init__(self):
+        self.proctime = ProcessingTime(duration=0)
+
+    def update(self, curr_proc_time: ProcessingTime):
+        self.proctime.duration = curr_proc_time.duration
+
+
 dmvis = DMVisualisation()
+mdi = MoreDebugInfo()
 
 app = FastAPI()
 
@@ -101,7 +114,9 @@ async def put_contact(
 @app.get("/dmvisdebug", response_class=HTMLResponse)
 async def get_dmvisdebug(request: Request):
     lead_dist = dmvis.dmplot_state.tram_state_transition.lead_distance
-    safe_emergency_dist = dmvis.dmplot_state.tram_state_transition.safe_emergency_distance
+    safe_emergency_dist = (
+        dmvis.dmplot_state.tram_state_transition.safe_emergency_distance
+    )
     rail_obs = dmvis.dmplot_state.hlc_state.list_detected_railway_obstacle
     rail_obs_amount = len(rail_obs)
     detected_obs = dmvis.dmplot_state.hlc_state.list_detected_obstacle
@@ -114,18 +129,13 @@ async def get_dmvisdebug(request: Request):
 
     context = {
         "request": request,
-        
         "lead_dist": lead_dist,
         "safe_emergency_dist": safe_emergency_dist,
-        
         "rail_obs_amount": rail_obs_amount,
         "rail_obs": rail_obs,
-
         "detected_obs_amount": detected_obs_amount,
         "detected_obs": detected_obs,
-
         "tram": tram,
-
         "fsm_state": fsm_state,
         "dtc": dtc,
         "ttc": ttc,
@@ -149,7 +159,7 @@ async def get_dmvis(request: Request):
 
 @app.post("/dmvis", status_code=201)
 async def update_dmvis(p: DMPlot):
-    #print(p)
+    # print(p)
     dmvis.update_dmplot_state(p)
     return
 
@@ -170,7 +180,6 @@ async def get_dmvisbak(request: Request):
         "data": data,
     }
 
-
     return templates.TemplateResponse("fragments/plot1.html", context)
 
 
@@ -179,4 +188,22 @@ async def update_dmvisbak(stuff: Stuff):
     global xs
     xs = stuff.xs
 
+    return
+
+
+@app.get("/moredebuginfo", status_code=200)
+async def get_moredebuginfo(request: Request):
+    proctime = mdi.proctime.duration
+
+    context = {
+        "request": request,
+        "function_duration": proctime,
+    }
+
+    return templates.TemplateResponse("fragments/mdi1.html", context)
+
+
+@app.post("/moredebuginfo", status_code=201)
+async def post_moredebuginfo(pt: ProcessingTime):
+    mdi.proctime = pt
     return
