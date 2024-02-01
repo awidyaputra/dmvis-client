@@ -244,6 +244,7 @@ class DMVisualisation:
         self.ydtc.append(self.dmplot_state.tram_state_transition.dtc)
         self.yt.append(self.dmplot_state.tram_state.x)
         self.xt.append(self.dmplot_state.tram_state.y)
+        self.ydbw.append(self.dmplot_state.tram_state.current_command)
 
         self.x = self.dmplot_state.tram_state.t
         self.t.append(self.x)

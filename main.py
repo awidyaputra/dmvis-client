@@ -110,7 +110,7 @@ async def get_dmvisdebug(request: Request):
     fsm_state = dmvis.dmplot_state.tram_state_transition.fsm_state.name
     dtc = dmvis.dmplot_state.tram_state_transition.dtc
     ttc = dmvis.dmplot_state.tram_state_transition.ttc
-    speed_setpoint = dmvis.dmplot_state.tram_state_transition.speed
+    speed_setpoint = dmvis.dmplot_state.hlc_state.speed_setpoint
 
     context = {
         "request": request,

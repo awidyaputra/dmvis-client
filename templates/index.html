@@ -10,7 +10,7 @@
 <!-- 	</button> -->
 <!-- </div> -->
 
-<button hx-get="/dmvis" hx-target="this" hx-swap="outerHTML" class="btn btn-primary">Click for plot</button>
+<img hx-get="/dmvis" hx-trigger="every 20ms" hx-target="this" hx-swap="outerHTML" src="data:image/png;base64,{{ data }}" />
 <button hx-get="/dmvisdebug" hx-target="this" hx-swap="outerHTML" class="btn btn-primary">Click for debug msgs</button>
 
 <!-- <img id="dmplot"></img> -->
