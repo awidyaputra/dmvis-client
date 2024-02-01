@@ -146,7 +146,7 @@ async def get_dmvisdebug(request: Request):
 
 
 @app.get("/dmvis", response_class=HTMLResponse)
-async def get_dmvis(request: Request):
+def get_dmvis(request: Request):
     data = dmvis.draw_b64()
 
     context = {
