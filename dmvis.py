@@ -2,6 +2,16 @@ from typing import List
 from enum import IntEnum
 from pydantic import BaseModel
 
+import matplotlib
+import numpy as np
+
+from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
+from io import BytesIO
+import base64
+
+matplotlib.use("Agg")
+
 
 class PowerLevel(IntEnum):
     B5 = -5
@@ -71,15 +81,6 @@ class DMPlot(BaseModel):
     tram_state: TramState
     tram_state_transition: TramStateTransition
     hlc_state: HLCState
-
-
-import matplotlib
-import numpy as np
-
-from matplotlib import pyplot as plt
-from matplotlib.figure import Figure
-from io import BytesIO
-import base64
 
 
 class DMVisualisation:
