@@ -79,36 +79,6 @@ ax05.set_ylabel("y")
 
 ax05.axvspan(-1.2, 1.3, facecolor="gray", alpha=0.5)
 
-global ystate
-
-global yd
-global ysd
-
-global yr
-global ys
-global ydbw
-
-global t
-global x
-
-global yxre
-global yyre
-
-global yxtp
-global yytp
-
-global xt
-global yt
-
-global xo
-global yo
-
-global start
-global yttc
-global ydtc
-
-global tdbw
-
 ystate = [0.0]
 yd = [0.0]
 ysd = [0.0]
@@ -154,7 +124,7 @@ ax03.legend(
 
 
 def mpl_func_animation_cb(frame):
-    r = requests.get("http://localhost:8000/dmvis_data")
+    r = requests.get("http://127.0.0.1:8000/dmvis_data")
 
     j = r.json()
 
