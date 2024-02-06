@@ -7,10 +7,11 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+import matplotlib.animation as animation
 from io import BytesIO
 import base64
 
-matplotlib.use("Agg")
+import requests
 
 
 class PowerLevel(IntEnum):
@@ -288,3 +289,86 @@ class DMVisualisation:
 
     def update_dmplot_state(self, curr: DMPlot):
         self.dmplot_state = curr
+
+    def get_dmplot_state(self):
+        r = requests.get("http://localhost:8000/dmvis_data")
+
+        j = r.json()
+
+        self.update_dmplot_state(j)
+
+    def mpl_func_animation_cb(self, frame):
+        self.get_dmplot_state()
+
+        self.xt = [0.0]
+        self.yt = [0.0]
+        self.yo = [0.0]
+        self.xo = [0.0]
+        self.yxre = [0.0]
+        self.yyre = [0.0]
+        self.yxtp = [0.0]
+        self.yytp = [0.0]
+
+        self.ystate.append(self.dmplot_state.tram_state_transition.fsm_state)
+        self.yd.append(self.dmplot_state.tram_state_transition.lead_distance)
+        self.ysd.append(self.dmplot_state.tram_state_transition.safe_emergency_distance)
+        self.yr.append(self.dmplot_state.hlc_state.speed_setpoint)
+        self.ys.append(self.dmplot_state.tram_state.v)
+        self.yttc.append(self.dmplot_state.tram_state_transition.ttc)
+        self.ydtc.append(self.dmplot_state.tram_state_transition.dtc)
+        self.yt.append(self.dmplot_state.tram_state.x)
+        self.xt.append(self.dmplot_state.tram_state.y)
+        self.ydbw.append(self.dmplot_state.tram_state.current_command)
+
+        self.x = self.dmplot_state.tram_state.t
+        self.t.append(self.x)
+
+        self.yo = [o.y for o in self.dmplot_state.hlc_state.list_detected_object]
+        self.xo = [o.x for o in self.dmplot_state.hlc_state.list_detected_object]
+        self.yyre = [o.y for o in self.dmplot_state.hlc_state.list_rail_horizon]
+        self.yxre = [o.x for o in self.dmplot_state.hlc_state.list_rail_horizon]
+        self.yytp = [
+            o.y for o in self.dmplot_state.hlc_state.list_trajectory_prediction
+        ]
+        self.yxtp = [
+            o.x for o in self.dmplot_state.hlc_state.list_trajectory_prediction
+        ]
+
+        self.p011.set_data(self.t, self.yttc)
+        self.p011.set_data(self.t, self.ydtc)
+        self.p021.set_data(self.t, self.yd)
+        self.p022.set_data(self.t, self.ysd)
+        self.p031.set_data(self.t, self.yr)
+        self.p032.set_data(self.t, self.ys)
+        self.p041.set_data(self.t, self.ydbw)
+        self.p042.set_data(self.t, self.ystate)
+        self.p051.set_data(self.yt, self.xt)
+        self.p052.set_data(self.yo, self.xo)
+        self.p053.set_data(self.yyre, self.yxre)
+        self.p054.set_data(self.yytp, self.yxtp)
+
+        if self.x >= self.xmax - 1.00:
+            self.p011.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
+            self.p021.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
+            self.p032.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
+            self.p041.axes.set_xlim(self.x - self.xmax + 1.0, self.x + 1.0)
+
+        return (
+            self.p011,
+            self.p012,
+            self.p021,
+            self.p022,
+            self.p031,
+            self.p032,
+            self.p041,
+            self.p051,
+            self.p052,
+            self.p053,
+            self.p054,
+        )
+
+    def show(self):
+        self.simulation = animation.FuncAnimation(
+            self.fig, self.mpl_func_animation_cb, blit=False, interval=20, repeat=False
+        )
+        plt.show()

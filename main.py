@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 
 from io import BytesIO
 import base64
@@ -144,10 +144,17 @@ async def get_dmvisdebug(request: Request):
 
     return templates.TemplateResponse("fragments/dmvisdebug.html", context)
 
+@app.get("/dmvis_data", status_code=200)
+def get_dmvis_data() -> DMPlot:
+    return dmvis.dmplot_state
+
 
 @app.get("/dmvis", response_class=HTMLResponse)
 def get_dmvis(request: Request):
+    tic = time.perf_counter_ns()
     data = dmvis.draw_b64()
+    toc = time.perf_counter_ns()
+    print((toc - tic) / 1_000_000)
 
     context = {
         "request": request,
