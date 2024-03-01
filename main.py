@@ -15,6 +15,15 @@ import time
 
 from dmvis import DMPlot, DMVisualisation, TramState
 
+class CANTramStatus(BaseModel):
+    speed: float
+
+class TramCan(BaseModel):
+    speed: float = 0.0
+    cmd_torque: int = 0 + 15000
+    cmd_speed_limit: float = 0.0
+    cmd_autonomous_mode: int = 0x00 # 0x00 is off, 0xFA is on
+
 
 class ProcessingTime(BaseModel):
     duration: int
@@ -30,6 +39,7 @@ class MoreDebugInfo:
 
 dmvis = DMVisualisation()
 mdi = MoreDebugInfo()
+tramcan = TramCan()
 
 app = FastAPI()
 
@@ -210,7 +220,17 @@ async def get_moredebuginfo(request: Request):
     return templates.TemplateResponse("fragments/mdi1.html", context)
 
 
+
 @app.post("/moredebuginfo", status_code=201)
 async def post_moredebuginfo(pt: ProcessingTime):
     mdi.proctime = pt
     return
+
+@app.get("/tram/status/speed", status_code=200)
+async def get_can_tram_speed():
+    return tramcan.speed
+
+@app.post("/tram/status/speed", status_code=201)
+async def post_can_tram_speed(status: CANTramStatus):
+    tramcan.speed = status.speed
+    print(tramcan.speed)
